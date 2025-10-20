@@ -1,7 +1,8 @@
 package com.multidbd.demo.config;
 
+
+
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -9,10 +10,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Component
-public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectionProvider {
+public class SchemaMultiTenantConnectionProvider 
+    implements MultiTenantConnectionProvider<String> {
 
-    @Autowired
-    private DataSource dataSource;
+    private final DataSource dataSource;
+
+    public SchemaMultiTenantConnectionProvider(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Override
     public Connection getAnyConnection() throws SQLException {
@@ -25,25 +30,17 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     }
 
     @Override
-    public Connection getConnection(Object tenantIdentifier) throws SQLException {
-        String tenant = tenantIdentifier != null ? tenantIdentifier.toString() : "public";
-        Connection connection = getAnyConnection();
-        try {
-            // PostgreSQL schema switching
-            connection.createStatement().execute("SET search_path TO " + tenant);
-        } catch (SQLException e) {
-            throw new SQLException("Could not switch to tenant schema: " + tenant, e);
-        }
+    public Connection getConnection(String tenantIdentifier) throws SQLException {
+        final Connection connection = getAnyConnection();
+        connection.setSchema(tenantIdentifier);
         return connection;
     }
 
     @Override
-    public void releaseConnection(Object tenantIdentifier, Connection connection) throws SQLException {
-        try {
-            connection.createStatement().execute("SET search_path TO public");
-        } finally {
-            connection.close();
-        }
+    public void releaseConnection(String tenantIdentifier, Connection connection) 
+        throws SQLException {
+        connection.setSchema("public");
+        releaseAnyConnection(connection);
     }
 
     @Override
@@ -61,4 +58,3 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
         return null;
     }
 }
-
