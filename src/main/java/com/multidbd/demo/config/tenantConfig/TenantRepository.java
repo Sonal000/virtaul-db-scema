@@ -27,5 +27,12 @@ public class TenantRepository {
     public int insertTenant(String domain, String schema) {
         return jdbc.update("INSERT INTO config.tenants(domain_name, schema_name) VALUES (?, ?)", domain, schema);
     }
+    
+    public boolean tenantExists(String domain, String schema) {
+        String sql = "SELECT COUNT(*) FROM config.tenants WHERE domain_name = ? OR schema_name = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, domain, schema);
+        return count != null && count > 0;
+    }
+
 }
 

@@ -50,6 +50,8 @@ package com.multidbd.demo.interceptor;
 
 import com.multidbd.demo.config.TenantContext;
 import com.multidbd.demo.config.TenantResolver;
+import com.multidbd.demo.config.tenantConfig.MultiTenantProperties;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -57,18 +59,22 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class TenantInterceptor implements HandlerInterceptor {
 
     private final TenantResolver tenantResolver;
+    private final MultiTenantProperties multiTenantProperties;
 
-    public TenantInterceptor(TenantResolver tenantResolver) {
+    public TenantInterceptor(TenantResolver tenantResolver, MultiTenantProperties multiTenantProperties) {
         this.tenantResolver = tenantResolver;
+        this.multiTenantProperties = multiTenantProperties;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (!multiTenantProperties.isEnabled()) {
+            // single-tenant mode: use default tenant
+            TenantContext.setTenantId("public");
+            return true;
+        }
         String domain = request.getServerName();
         String tenantId = tenantResolver.resolveTenantId(domain);
-        if (tenantId == null) {
-            tenantId = "public";
-        }
         TenantContext.setTenantId(tenantId);
         System.out.println("DOMAIN NAME: " + domain + " | TENANT: " + tenantId);
         return true;

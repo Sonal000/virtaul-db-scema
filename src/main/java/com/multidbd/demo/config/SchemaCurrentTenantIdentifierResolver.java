@@ -33,7 +33,6 @@ public class SchemaCurrentTenantIdentifierResolver implements CurrentTenantIdent
     @Override
     public String resolveCurrentTenantIdentifier() {
         String tenantId = TenantContext.getTenantId();
-        System.out.println("CURRENT TENANT: " + tenantId);
         return tenantId != null ? tenantId : "public";
     }
 

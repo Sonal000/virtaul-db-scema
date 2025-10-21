@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "app.multitenant.enabled",
+  "type": "java.lang.String",
+  "description": "A description for 'app.multitenant.enabled'"
+}]}

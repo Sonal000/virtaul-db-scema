@@ -25,6 +25,7 @@
 
 package com.multidbd.demo.config;
 
+import com.multidbd.demo.config.tenantConfig.MultiTenantProperties;
 import com.multidbd.demo.interceptor.TenantInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -35,8 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final TenantInterceptor tenantInterceptor;
 
-    public WebConfig(TenantResolver tenantResolver) {
-        this.tenantInterceptor = new TenantInterceptor(tenantResolver);
+    public WebConfig(TenantResolver tenantResolver,MultiTenantProperties multiTenantProperties) {
+        this.tenantInterceptor = new TenantInterceptor(tenantResolver,multiTenantProperties);
     }
 
     @Override

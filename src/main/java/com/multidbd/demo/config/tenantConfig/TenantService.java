@@ -52,6 +52,9 @@ public class TenantService {
     }
 
     public void addTenant(String domain, String schema) throws Exception {
+        if (tenantRepository.tenantExists(domain, schema)) {
+            throw new IllegalArgumentException("Tenant with same domain or schema already exists");
+        }
         tenantRepository.insertTenant(domain, schema);
         ensureSchemaCreated(schema);
         cache.put(domain, schema);
