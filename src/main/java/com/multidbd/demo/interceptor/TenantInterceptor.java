@@ -67,16 +67,22 @@ public class TenantInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception  {
+        String tenantId = null;
         if (!multiTenantProperties.isEnabled()) {
-            // single-tenant mode: use default tenant
-            TenantContext.setTenantId("public");
-            return true;
+            tenantId = multiTenantProperties.getDefaultSchema();
+        } else {
+            String domain = request.getServerName();
+            tenantId = tenantResolver.resolveTenantId(domain);
+
+            if (tenantId == null) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "Unknown tenant domain: " + domain);
+                return false;
+            }
         }
-        String domain = request.getServerName();
-        String tenantId = tenantResolver.resolveTenantId(domain);
+
         TenantContext.setTenantId(tenantId);
-        System.out.println("DOMAIN NAME: " + domain + " | TENANT: " + tenantId);
         return true;
     }
 

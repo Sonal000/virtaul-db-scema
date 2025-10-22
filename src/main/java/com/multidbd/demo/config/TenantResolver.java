@@ -58,7 +58,8 @@ public class TenantResolver {
     }
 
     public String resolveTenantId(String domain) {
-        String tenantId = tenantService.resolveTenantByDomain(domain);
+    	String tenantId = null;
+    	tenantId = tenantService.resolveTenantByDomain(domain);
         if (tenantId != null) return tenantId;
 
         tenantId = domainMappings.get(domain);
